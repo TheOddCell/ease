@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+import sys
+import re
+import subprocess
+import argparse
+
+# --- Helpers ---
+
+def tput(code, *args):
+    try:
+        return subprocess.check_output(['tput', code, *map(str, args)], text=True)
+    except subprocess.CalledProcessError:
+        return ''
+
+def nearest_ansi_color(r, g, b):
+    """Approximate RGB to nearest xterm-256 color"""
+    r6 = round(r / 255 * 5)
+    g6 = round(g / 255 * 5)
+    b6 = round(b / 255 * 5)
+    return 16 + 36*r6 + 6*g6 + b6
+
+CURSOR_TYPES = {
+    'block': '\033[2 q',
+    'underline': '\033[4 q',
+    'bar': '\033[6 q',
+    'invisible': tput('civis')
+}
+
+# --- Short aliases ---
+ALIASES = {
+    'c': 'color',
+    'b': 'bgcolor',
+    't': 'title',
+    's': 'smcup',
+    'r': 'rmcup',
+    'x': 'clear',
+    'u': 'cursor',
+    'f': 'bold',
+    'd': 'dim',
+    'z': 'reset',
+    'a': 'bell'
+}
+
+# --- Core function ---
+
+def eaze(text):
+    # matches \zTYPE-ARGS\z
+    pattern = re.compile(r'\\z([A-Za-z]+)-?([^\\z]*)\\z')
+    
+    def repl(match):
+        typ = match.group(1).lower()
+        args = match.group(2)
+        
+        # map short alias to full type if exists
+        typ = ALIASES.get(typ, typ)
+
+        if typ == 'title':
+            return f'\033]0;{args}\007'
+        elif typ == 'color':
+            try:
+                r, g, b = map(int, args.split(','))
+                code = nearest_ansi_color(r, g, b)
+                return f'\033[38;5;{code}m'
+            except:
+                return ''
+        elif typ == 'bgcolor':
+            try:
+                r, g, b = map(int, args.split(','))
+                code = nearest_ansi_color(r, g, b)
+                return f'\033[48;5;{code}m'
+            except:
+                return ''
+        elif typ == 'smcup':
+            return tput('smcup')
+        elif typ == 'rmcup':
+            return tput('rmcup')
+        elif typ == 'clear':
+            return tput('clear')
+        elif typ == 'cursor':
+            return CURSOR_TYPES.get(args.lower(), '')
+        elif typ == 'bold':
+            return tput('bold')
+        elif typ == 'dim':
+            return tput('dim')
+        elif typ == 'reset':
+            return tput('sgr0')
+        elif typ == 'bell':
+            return '\a'
+        else:
+            return match.group(0)  # unknown: leave as-is
+    
+    return pattern.sub(repl, text)
+
+# --- CLI ---
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="EAZE: Easy Escape Sequences for terminal output",
+        fromfile_prefix_chars='@'  # optional: @file
+    )
+    parser.add_argument('file', nargs='?', help="File to read. If omitted, stdin is used")
+    parser.add_argument('-p', '--print', help="Print the given string with a trailing newline")
+    parser.add_argument('-e', '--echo', help="Print the given string without a newline")
+    args, extra = parser.parse_known_args()  # allows '--' separator
+
+    # Handle '--' extra arguments
+    if extra and extra[0] == '--' and len(extra) > 1:
+        remaining = ' '.join(extra[1:])
+        if args.print:
+            args.print += ' ' + remaining
+        elif args.echo:
+            args.echo += ' ' + remaining
+
+    if args.print is not None:
+        content = args.print
+        print(eaze(content))
+    elif args.echo is not None:
+        content = args.echo
+        print(eaze(content), end='')
+    elif args.file is not None:
+        with open(args.file, 'r') as f:
+            content = f.read()
+        print(eaze(content), end='')
+    else:
+        content = sys.stdin.read()
+        print(eaze(content), end='')
+
+if __name__ == '__main__':
+    main()
