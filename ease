@@ -95,7 +95,7 @@ def eaze(text):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="EAZE: Easy Escape Sequences for terminal output",
+        description="EASE: Easy Escape Sequences for terminal output",
         fromfile_prefix_chars='@'  # optional: @file
     )
     parser.add_argument('file', nargs='?', help="File to read. If omitted, stdin is used")
