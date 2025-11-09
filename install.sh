@@ -1,6 +1,6 @@
 #!/bin/sh
 : "${INSTALLPREFIX:=/usr/local/bin}"
-if [ -e "./ease" ]; then
+if [ -f "./ease" ]; then
   chmod a+x ease
   ./ease -p "Found \zc-46,255,126\zease \zz\zin current directory"
   cp ./ease /tmp/ease
