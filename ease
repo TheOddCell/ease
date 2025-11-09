@@ -101,8 +101,13 @@ def main():
     parser.add_argument('file', nargs='?', help="File to read. If omitted, stdin is used")
     parser.add_argument('-p', '--print', help="Print the given string with a trailing newline")
     parser.add_argument('-e', '--echo', help="Print the given string without a newline")
+    parser.add_argument('-l', '--list', action='store_true', help="List all supported escape sequences")
+    
     args, extra = parser.parse_known_args()  # allows '--' separator
-
+    if args.list is not None:
+        for i in ALIASES:
+            print(i, "-", ALIASES[i])
+        sys.exit(0)
     # Handle '--' extra arguments
     if extra and extra[0] == '--' and len(extra) > 1:
         remaining = ' '.join(extra[1:])
