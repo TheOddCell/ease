@@ -104,7 +104,7 @@ def main():
     parser.add_argument('-l', '--list', action='store_true', help="List all supported escape sequences")
     
     args, extra = parser.parse_known_args()  # allows '--' separator
-    if args.list is not None:
+    if args.list:
         for i in ALIASES:
             print(i, "-", ALIASES[i])
         sys.exit(0)
