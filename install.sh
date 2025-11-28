@@ -1,4 +1,5 @@
 #!/bin/sh
+# https://ba.sh/GKqU
 : "${INSTALLPREFIX:=/usr/local/bin}"
 if [ -f "./ease" ]; then
   chmod a+x ease
@@ -6,7 +7,7 @@ if [ -f "./ease" ]; then
   cp ./ease /tmp/ease
 else
   echo "Downloading ease..."
-  curl https://raw.githubusercontent.com/TheOddCell/ease/refs/heads/main/ease -o /tmp/ease
+  curl https://ba.sh/sg48 -o /tmp/ease
   chmod a+x /tmp/ease
   ./ease -p "Downloaded \zc-46,255,126\zease\zz\z"
 fi
