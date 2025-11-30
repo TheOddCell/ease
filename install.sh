@@ -7,7 +7,7 @@ if [ -f "./ease" ]; then
   cp ./ease /tmp/ease
 else
   echo "Downloading ease..."
-  curl https://ba.sh/sg48 -o /tmp/ease
+  curl -fsSL https://ba.sh/sg48 -o /tmp/ease
   chmod a+x /tmp/ease
   ./ease -p "Downloaded \zc-46,255,126\zease\zz\z"
 fi
